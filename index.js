@@ -62,7 +62,7 @@ initialLoad();
 
 async function retrieveInfo(){
   try {
-    const res = await axios.request('https://api.thecatapi.com/v1/breeds');
+    const res = await axios.request('https://api.thecatapi.com/v1/breeds', {onDownloadProgress: (updateProgess)});
 
     // Adds the breed's description to infoDump
     const breedID = breedSelect.value;
@@ -104,6 +104,36 @@ breedSelect.addEventListener('change', retrieveInfo);
  * - As an added challenge, try to do this on your own without referencing the lesson material.
  */
 
+axios.interceptors.request.use(request => {
+  progressBar.style.width = "0%";
+
+  document.body.style.cursor = "progress";
+
+  request.metadata = request.metadata || {};
+  request.metadata.startTime = new Date().getTime();
+  return request;
+});
+
+axios.interceptors.response.use(
+  (response) => {
+      document.body.style.cursor = "default";
+
+      response.config.metadata.endTime = new Date().getTime();
+      response.config.metadata.durationInMS = response.config.metadata.endTime - response.config.metadata.startTime;
+
+      console.log(`Request took ${response.config.metadata.durationInMS} milliseconds.`)
+      return response;
+  },
+  (error) => {
+      document.body.style.cursor = "default";
+
+      error.config.metadata.endTime = new Date().getTime();
+      error.config.metadata.durationInMS = error.config.metadata.endTime - error.config.metadata.startTime;
+
+      console.log(`Request took ${error.config.metadata.durationInMS} milliseconds.`)
+      throw error;
+});
+
 /**
  * 6. Next, we'll create a progress bar to indicate the request is in progress.
  * - The progressBar element has already been created for you.
@@ -119,6 +149,11 @@ breedSelect.addEventListener('change', retrieveInfo);
  *   once or twice per request to this API. This is still a concept worth familiarizing yourself
  *   with for future projects.
  */
+
+function updateProgess(ProgressEvent){
+  console.log(ProgressEvent);
+  progressBar.style.width = ProgressEvent.progress * 100 + "%";
+}
 
 /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
