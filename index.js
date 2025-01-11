@@ -25,12 +25,11 @@ const API_KEY = '';
 
 async function initialLoad() {
   try {
-    const res = await fetch('https://api.thecatapi.com/v1/breeds');
-    const data = await res.json();
-    console.log(data);
+    const res = await axios.request('https://api.thecatapi.com/v1/breeds');
+    console.log(res.data);
 
     // Create option tags
-    for (const breed of data) {
+    for (const breed of res.data) {
       const option = document.createElement('option');
       option.setAttribute('value', breed.id);
       option.textContent = breed.name;
@@ -63,13 +62,12 @@ initialLoad();
 
 async function retrieveInfo(){
   try {
-    const res = await fetch('https://api.thecatapi.com/v1/breeds');
-    const data = await res.json();
+    const res = await axios.request('https://api.thecatapi.com/v1/breeds');
 
     // Adds the breed's description to infoDump
     const breedID = breedSelect.value;
     const paraDescription = document.createElement('p');
-    const breed = data.find(({id}) => id === breedID);
+    const breed = res.data.find(({id}) => id === breedID);
     paraDescription.textContent = breed.description;
     infoDump.replaceChildren(paraDescription);
 
